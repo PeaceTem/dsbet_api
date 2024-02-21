@@ -1,0 +1,17 @@
+{
+  "info": {
+    "version": "1.0",
+    "title": "My App"
+  },
+  "host": "localhost:4000",
+  "definitions": {},
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Operations about Users"
+    }
+  ],
+  "paths": {},
+  "swagger": "2.0",
+  "basePath": "/api"
+}

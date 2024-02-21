@@ -1,0 +1,26 @@
+<.header>
+  Value <%= @value.id %>
+  <:subtitle>This is a value record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/values/#{@value}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit value</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Value"><%= @value.value %></:item>
+</.list>
+
+<.back navigate={~p"/values"}>Back to values</.back>
+
+<.modal :if={@live_action == :edit} id="value-modal" show on_cancel={JS.patch(~p"/values/#{@value}")}>
+  <.live_component
+    module={DSBetWeb.ValueLive.FormComponent}
+    id={@value.id}
+    title={@page_title}
+    action={@live_action}
+    value={@value}
+    patch={~p"/values/#{@value}"}
+  />
+</.modal>

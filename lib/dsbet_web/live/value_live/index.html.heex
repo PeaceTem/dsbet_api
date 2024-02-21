@@ -1,0 +1,246 @@
+
+<div class="grid grid-cols-8 grid-rows-5 h-screen w-2xl" style="background:#F5DEB3">
+  <div class="col-span-1 row-span-3">
+      
+    <.header>
+      <div>
+        Pachinko
+      </div>
+      <div>
+        <%= @page_title %>
+      </div>
+      <div>
+        <.link patch={~p"/values/new"}>
+          <.button>New Value</.button>
+        </.link>
+      </div>
+    </.header>
+
+
+      <.button phx-click="start_timer">Start Timer</.button>
+      <div id="time_remaining">
+        <%= @time_remaining %>
+      </div>
+      <div>
+      <span >Start Value: </span><span id="start_value">Start Value </span>
+      <span>Diff: </span><span id="diff"> Diff </span>
+      <span> Duration Left: </span><span id="duration_left"> Duration Left </span>
+      </div>
+
+
+
+
+
+      <div>
+        <span id="current_time">
+        <%= @timer %>
+        </span>
+        sec
+      </div>
+      <div id="current_value">
+        <%= @display_value %>
+      </div>
+
+
+  </div>
+
+  <div class="col-span-5 row-span-3 flex items-center relative">
+    <div phx-hook="chart" id="chartContainer" style="height: 100%; width: 100%;">
+    </div>
+  </div>
+
+  <div class="col-span-2 row-span-5 relative">
+    <div class="overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 h-full">
+      <.table
+        id="bets"
+        rows={@streams.bets}
+      >
+        <:col :let={{_id, bet}} label="Open"><%= bet.start_value %></:col>
+        <:col :let={{_id, bet}} label="Close"><%= bet.end_value %></:col>
+        <:col :let={{_id, bet}} label="Tank">
+          <%= if bet.tank do %> 
+            Tanks
+          <% else %>
+            -Tanks
+          <% end %>
+        </:col>
+
+        <:col :let={{_id, bet}} label="Stake"><%= bet.stake %></:col>
+        <:col :let={{_id, bet}} label="Duration"><%= bet.duration %></:col>
+      </.table>
+
+    </div>
+  </div>
+
+  <div class="col-span-6 row-span-2 relative flex items-center p-4">
+  
+  
+
+    <div class="h-full w-full">
+      <.simple_form
+        for={@bet_form}
+        id="bet-form"
+        phx-change="validate_bet"
+        phx-submit="bet_submitted"
+      >
+        
+        <.input id="id_stake" field={@bet_form[:stake]} type="number" label="Stake (in Naira)" value={100} required/>
+        <.input id="id_tank" field={@bet_form[:tank]} type="checkbox" label="Tanks (price goes down)"/>
+        <.input id="id_duration" field={@bet_form[:duration]} type="number" label="Duration (in seconds)" value={30} required/>
+
+        <:actions>
+          <%= if assigns.form_is_not_valid do %>
+          <.button disabled> Submit Bet (disabled)</.button>
+          <% else %>
+          <.button phx-disable-with="Saving...">Submit Bet</.button>
+          <% end %>
+        </:actions>
+      </.simple_form>
+    </div>
+
+
+  
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<.modal :if={@live_action in [:new, :edit]} id="value-modal" show on_cancel={JS.patch(~p"/values")}>
+  <.live_component
+    module={DSBetWeb.ValueLive.FormComponent}
+    id={@value.id || :new}
+    title={@page_title}
+    action={@live_action}
+    value={@value}
+    patch={~p"/values"}
+  />
+</.modal>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+function formatList(list) {
+  return list.map((element, index) => ({ x: index + 1, y: element }));
+}
+
+var xVal;
+var chart;
+var dps;
+let list_value;
+
+window.addEventListener("phx:socket-connected", (e) => {
+    let list_value = e.detail.value_list;
+    console.log(list_value)
+    dps = formatList(list_value);   //dataPoints. 
+
+    chart = new CanvasJS.Chart("chartContainer",{
+        zoomEnabled: true,
+        theme: "light1",
+        backgroundColor: "#F5DEB3",
+        title :{
+            text: "Pachinko",
+            color: "brown",
+        },
+        axisX: {						
+            title: "Axis X Title"
+        },
+        axisY: {						
+            title: "Units"
+        },
+        data: [{
+            type: "splineArea",
+            color: "brown",
+            dataPoints : dps
+        }]
+    });
+
+    chart.render();
+    xVal = dps.length;
+
+
+})
+
+let current_value = document.getElementById("current_value");
+var yVal;	
+
+window.addEventListener("phx:chart-updated", (e) => {
+  let el = e.detail.last_value;
+  if(el) {
+    // logic for highlighting
+    current_value.textContent = el;
+    // console.log(el);
+
+    xVal++;
+    yVal = el;	
+    dps.push({x: xVal,y: yVal});
+
+        if (dps.length > 100 )
+        {
+            dps.shift();				
+        }
+
+        chart.render();
+  }
+
+})
+</script>
+<script>
+let current_time = document.getElementById("current_time");
+let time_value;
+window.addEventListener("phx:time-updated", (event) => {
+  time_value = event.detail.current_time;
+  current_time.textContent = time_value;
+})
+</script>
+
+
+<script>
+let time_remaining = document.getElementById("time_remaining");
+let time_remaining_value;
+window.addEventListener("phx:time_remaining-updated", (event) => {
+  time_remaining_value = event.detail.time_remaining;
+  console.log(time_remaining_value)
+
+  time_remaining.textContent = time_remaining_value;
+})
+</script>
+
+
+<script>
+let duration_left = document.getElementById("duration_left");
+let diff = document.getElementById("diff");
+let start_value = document.getElementById("start_value");
+let bet_details;
+window.addEventListener("phx:bet_state-updated", (event) => {
+  bet_details = event.detail;
+  duration_left.textContent = bet_details.duration_left;
+  diff.textContent = bet_details.diff;
+  start_value.textContent = bet_details.start_value;
+})
+</script>

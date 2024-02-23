@@ -8,6 +8,7 @@ defmodule DSBetWeb.ValueLive.Index do
   alias DSBet.Game
   alias DSBet.Game.Bet
   alias DSBet.Bet.BetWorkerSubscription
+  alias DSBet.Wallets
 
 
   # def render(assigns) do
@@ -24,7 +25,6 @@ defmodule DSBetWeb.ValueLive.Index do
       |> assign(:user_id, session["user_id"] || 1)
 
 
-    if connected?(socket), do: Subscription.subscribe()
 
     # IO.inspect(%{user_id: updated_socket.assigns.user_id})
     # do stream insert after a bet has been closed
@@ -35,17 +35,23 @@ defmodule DSBetWeb.ValueLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
+
+    wallet = Wallets.get_user_wallet(1)
     changeset = Game.change_bet(%Bet{})
 
+    if connected?(socket), do: Subscription.subscribe()
+
     socket = socket
-    |> assign(:timer, 30)
     |> assign(:display_value, DSBet.ValueTracker.get_value())
     # |> assign(:user_id, user_id)
-    |> assign(:time_remaining, 30)
     |> assign_form(changeset)
     |> assign(:form_is_not_valid, true)
+    |> assign(:balance, Decimal.to_string(wallet.balance))
 
     Process.send_after(self(), :connected, 100)
+
+
+    # use the user object to get the bets related to the user
     _user = Accounts.get_user!(1)
     last_bet = Game.last_bet()
     IO.puts("Gotten to the first place!")
@@ -78,7 +84,7 @@ defmodule DSBetWeb.ValueLive.Index do
 
 
   defp apply_action(socket, :index, _params) do
-    if connected?(socket), do: DSBet.Timer.Subscription.subscribe()
+    # if connected?(socket), do: DSBet.Timer.Subscription.subscribe()
 
     socket
     |> assign(:page_title, "Ta Tete Ko J'ere!")
@@ -112,50 +118,46 @@ defmodule DSBetWeb.ValueLive.Index do
 
   @impl true
   def handle_info({:value_updated, new_value}, socket) do
-    # {:noreply, update(socket, :display_value, fn _ -> new_value end)}
-    # updated_socket = socket
-    # |> assign(:display_value, new_value)
-
-    # {:noreply, updated_socket}
+    # update chart
     {:noreply, push_event(socket, "chart-updated", %{last_value: new_value})}
   end
 
 
 
   # decrement the timer, update the difference, finalise the bet when the timer is on zero
-  @impl true
-  def handle_info(:time_updated, socket) do
-    # {:noreply, update(socket, :timer, fn time_value -> time_value - 1 end)}
-    case socket.assigns.timer do
-      1 -> DSBet.Timer.Subscription.unsubscribe()
-      _ -> nil
-    end
-    new_time = max(0, socket.assigns.timer - 1)
-    updated_socket = put_in(socket.assigns[:timer], new_time)
-    {:noreply, push_event(updated_socket, "time-updated", %{current_time: new_time})}
-  end
+  # @impl true
+  # def handle_info(:time_updated, socket) do
+  #   # {:noreply, update(socket, :timer, fn time_value -> time_value - 1 end)}
+  #   case socket.assigns.timer do
+  #     1 -> DSBet.Timer.Subscription.unsubscribe()
+  #     _ -> nil
+  #   end
+  #   new_time = max(0, socket.assigns.timer - 1)
+  #   updated_socket = put_in(socket.assigns[:timer], new_time)
+  #   {:noreply, push_event(updated_socket, "time-updated", %{current_time: new_time})}
+  # end
 
 
 
-  @impl true
-  def handle_info(:tick, socket) when socket.assigns.time_remaining > 0 do
+  # @impl true
+  # def handle_info(:tick, socket) when socket.assigns.time_remaining > 0 do
 
-    new_time_remaining = socket.assigns.time_remaining - 1
+  #   new_time_remaining = socket.assigns.time_remaining - 1
 
-    if new_time_remaining > 5 do
-      Process.send_after(self(), :tick, 1000)
-    end
+  #   if new_time_remaining > 5 do
+  #     Process.send_after(self(), :tick, 1000)
+  #   end
 
-    updated_socket = put_in(socket.assigns[:time_remaining], new_time_remaining)
-    IO.inspect(new_time_remaining)
+  #   updated_socket = put_in(socket.assigns[:time_remaining], new_time_remaining)
+  #   IO.inspect(new_time_remaining)
 
-    {:noreply, push_event(updated_socket, "time_remaining-updated", %{time_remaining: new_time_remaining})}
-  end
+  #   {:noreply, push_event(updated_socket, "time_remaining-updated", %{time_remaining: new_time_remaining})}
+  # end
 
-  @impl true
-  def handle_info(:tick, socket) do
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_info(:tick, socket) do
+  #   {:noreply, socket}
+  # end
 
 
 
@@ -164,6 +166,7 @@ defmodule DSBetWeb.ValueLive.Index do
     start_value: start_value,
     duration_left: duration_left,
     diff: diff,
+    tank: tank,
     }}, socket) do
 
 
@@ -176,6 +179,7 @@ defmodule DSBetWeb.ValueLive.Index do
         start_value: start_value,
         duration_left: duration_left,
         diff: diff,
+        tank: tank,
         }
         )
       }
@@ -186,20 +190,20 @@ defmodule DSBetWeb.ValueLive.Index do
 
 
 
-  @impl true
-  def handle_event("start_timer", _unsigned_params, socket) do
-    Process.send(self(), :tick, [])
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_event("start_timer", _unsigned_params, socket) do
+  #   Process.send(self(), :tick, [])
+  #   {:noreply, socket}
+  # end
 
-  @impl true
-  @spec handle_event(<<_::48>>, map(), Phoenix.LiveView.Socket.t()) :: {:noreply, map()}
-  def handle_event("delete", %{"id" => id}, socket) do
-    value = Tracker.get_value!(id)
-    {:ok, _} = Tracker.delete_value(value)
+  # @impl true
+  # @spec handle_event(<<_::48>>, map(), Phoenix.LiveView.Socket.t()) :: {:noreply, map()}
+  # def handle_event("delete", %{"id" => id}, socket) do
+  #   value = Tracker.get_value!(id)
+  #   {:ok, _} = Tracker.delete_value(value)
 
-    {:noreply, stream_delete(socket, :values, value)}
-  end
+  #   {:noreply, stream_delete(socket, :values, value)}
+  # end
 
 
   @impl true
@@ -227,26 +231,24 @@ defmodule DSBetWeb.ValueLive.Index do
   end
 
 
-
   @impl true
-  # def handle_event("bet_submitted", %{"start_value" => open_price, "duration" => duration, "tank" => tank, "stake" => stake}, socket) do
-  # def handle_event("bet_submitted", %{"bet" => bet_params}, socket) do
   def handle_event("bet_submitted", params, socket) do
     IO.inspect(%{params: params["bet"]})
-
-    # IO.inspect(%{submitted_bet_params: bet_params})
-  # # # def handle_event("bet_submitted",_, socket) do
-
-
-  #   # duration = 100
-  #   # tank = true
-  #   # stake = 100
-  #   # bet_params = %{start_value: open_price, duration: duration, tank: tank, stake: stake, user_id: socket.assigns.user_id}
-  #   # bet_params = %{start_value: open_price, duration: duration, tank: tank, stake: stake, user_id: 1}
+    user_id = 1
+    wallet = Accounts.get_wallet_user(user_id)
+    IO.inspect(%{wallet: wallet})
 
     bet_attrs = params["bet"]
-      |> Map.put("user_id", 1)
+      |> Map.put("user_id", user_id)
       |> Map.put("start_value", DSBet.ValueTracker.get_value())
+
+    IO.inspect(%{stake: Integer.parse(bet_attrs["stake"])})
+    if Decimal.to_integer(wallet.balance) >= Integer.parse(bet_attrs["stake"]) do
+      IO.inspect(%{can_bet: "yes"})
+    else
+      IO.inspect(%{can_bet: "no"})
+
+    end
 
     IO.inspect(%{bet_attrs: bet_attrs})
 
@@ -254,17 +256,10 @@ defmodule DSBetWeb.ValueLive.Index do
 
     IO.inspect(bet)
     Phoenix.PubSub.subscribe(DSBet.PubSub, "bet-worker-#{bet.id}")
-    # start the dynamic supervisor here (Take the logic out of this socket)
-    # whenever a socket is mounted
-    # check if the user is authenticated
-    # and check for the user's active bet
-    # listen to the pubsub echo coming from the process created to handle the bet
     DSBet.Bet.Utils.start_bet_worker(%{id: bet.id, name: :"bet-worker-#{bet.id}"})
     IO.puts("Gotten to the worker")
     {:noreply, socket}
   end
-
-
 
   # defp authenticated?(assigns) do
   #   assigns[:user_id] != nil

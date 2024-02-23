@@ -38,14 +38,15 @@ defmodule DSBet.ValueTracker do
 
   @impl true
   def handle_cast(:update_value, %{value_list: value_list, value: value}) do
-    value_gotten = DSBet.RandomGenerator.get(value)
-    new_value = value + value_gotten
-    IO.inspect(%{new_value: new_value, value_gotten: value_gotten})
+    # value_gotten = DSBet.RandomGenerator.get(value)
+    # new_value = value + value_gotten
+    new_value = DSBet.RandomGenerator.get(value)
+    # IO.inspect(%{new_value: new_value})
 
     temp_list = value_list ++ [new_value]
     new_value_list = temp_list
       |> Enum.reverse()
-      |> Enum.take(100)
+      |> Enum.take(500)
       |> Enum.reverse()
     Phoenix.PubSub.broadcast(DSBet.PubSub, "value_tracker", {:value_updated, new_value})
     schedule_work()

@@ -56,6 +56,7 @@ defmodule DSBet.Bet.Worker do
             start_value: start_value,
             duration_left: duration_left,
             diff: diff,
+            tank: bet.tank,
         }})
 
     else
@@ -66,6 +67,7 @@ defmodule DSBet.Bet.Worker do
             start_value: start_value,
             duration_left: duration_left,
             diff: diff,
+            tank: bet.tank,
         }})
 
 

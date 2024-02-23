@@ -75,9 +75,7 @@ defmodule DSBet.Accounts do
   def get_user_wallet(user_id) do
     query = from u in User,
       where: u.id == ^user_id,
-      select: u,
-      preload: :wallet
-
+      select: u
     Repo.one(query)
   end
 

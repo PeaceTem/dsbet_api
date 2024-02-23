@@ -15,6 +15,9 @@ module.exports = {
     extend: {
       colors: {
         brand: "#FD4F00",
+        fda: "#1a2035",
+        lightText: "#606477",
+        yellow: "#f5700c",
       }
     },
   },

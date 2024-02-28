@@ -75,7 +75,7 @@ defmodule DSBetWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
+                  <.icon name="hero-x-mark-solid" class="h-5 w-5 text-zinc-900" />
                 </button>
               </div>
               <div id={"#{@id}-content"}>
@@ -112,7 +112,7 @@ defmodule DSBetWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-click={clear_flash(@kind, @id)}
       role="alert"
       class={[
         "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
@@ -132,6 +132,14 @@ defmodule DSBetWeb.CoreComponents do
       </button>
     </div>
     """
+  end
+
+
+  def clear_flash(kind, id) do
+    JS.push("lv:clear-flash", value: %{key: kind})
+      |> JS.push("clear-flash")
+      |> hide("##{id}")
+
   end
 
   @doc """
@@ -229,6 +237,7 @@ defmodule DSBetWeb.CoreComponents do
     ~H"""
     <button
       type={@type}
+      style="background: linear-gradient(60deg,#f5700c,#ff9800)"
       class={[
         "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
@@ -270,6 +279,7 @@ defmodule DSBetWeb.CoreComponents do
   attr :name, :any
   attr :label, :string, default: nil
   attr :value, :any
+  attr :cls_attr, :any, default: nil
 
   attr :type, :string,
     default: "text",
@@ -316,7 +326,7 @@ defmodule DSBetWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+          class="rounded border-zinc-300 text-red-900 focus:ring-0"
           {@rest}
         />
         <%= @label %>
@@ -376,10 +386,11 @@ defmodule DSBetWeb.CoreComponents do
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
+          "mt-2 border border-zinc-400 block w-full rounded-lg focus:ring-0 sm:text-sm sm:leading-6",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          @errors != [] && "border-rose-400 focus:border-rose-400",
+          @cls_attr
         ]}
         {@rest}
       />
@@ -396,7 +407,7 @@ defmodule DSBetWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-400">
       <%= render_slot(@inner_block) %>
     </label>
     """

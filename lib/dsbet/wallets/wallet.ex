@@ -16,4 +16,11 @@ defmodule DSBet.Wallets.Wallet do
     |> validate_required([:balance, :user_id])
     |> unique_constraint(:user_id)
   end
+
+  @doc false
+  def balance_update_changeset(wallet, attrs) do
+    wallet
+    |> cast(attrs, [:balance])
+    |> validate_required([:balance])
+  end
 end

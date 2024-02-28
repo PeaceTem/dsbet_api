@@ -39,6 +39,14 @@ defmodule DSBet.Wallets do
 
   def get_user_wallet(user_id), do: Repo.get_by(Wallet, user_id: user_id)
 
+
+  # def get_wallet_user(user_id) do
+  #   query = from w in DSBet.Wallets.Wallet,
+  #     where: w.user_id == ^user_id,
+  #     select: w
+  #   Repo.one(query)
+  # end
+
   @doc """
   Creates a wallet.
 
@@ -82,6 +90,11 @@ defmodule DSBet.Wallets do
     |> Repo.update()
   end
 
+  def update_wallet_balance(%Wallet{} = wallet, attrs) do
+    wallet
+    |> Wallet.balance_update_changeset(attrs)
+    |> Repo.update()
+  end
   @doc """
   Deletes a wallet.
 

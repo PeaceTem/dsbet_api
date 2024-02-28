@@ -35,8 +35,9 @@ defmodule DSBetWeb.ValueLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
+    user_id = socket.assigns.user_id
 
-    wallet = Wallets.get_user_wallet(1)
+    wallet = Wallets.get_user_wallet(user_id)
     changeset = Game.change_bet(%Bet{})
 
     if connected?(socket), do: Subscription.subscribe()
@@ -45,15 +46,15 @@ defmodule DSBetWeb.ValueLive.Index do
     |> assign(:display_value, DSBet.ValueTracker.get_value())
     # |> assign(:user_id, user_id)
     |> assign_form(changeset)
-    |> assign(:form_is_not_valid, true)
+    |> assign(:form_is_not_valid, false)
     |> assign(:balance, Decimal.to_string(wallet.balance))
 
     Process.send_after(self(), :connected, 100)
 
 
     # use the user object to get the bets related to the user
-    _user = Accounts.get_user!(1)
-    last_bet = Game.last_bet()
+    _user = Accounts.get_user!(user_id)
+    last_bet = Game.last_bet(user_id)
     IO.puts("Gotten to the first place!")
     IO.inspect(%{end_value: last_bet.end_value, null: is_nil(last_bet.end_value)})
 
@@ -117,9 +118,9 @@ defmodule DSBetWeb.ValueLive.Index do
 
 
   @impl true
-  def handle_info({:value_updated, new_value}, socket) do
+  def handle_info({:value_updated, {new_value, new_time}}, socket) do
     # update chart
-    {:noreply, push_event(socket, "chart-updated", %{last_value: new_value})}
+    {:noreply, push_event(socket, "chart-updated", %{last_value: [new_value, new_time]})}
   end
 
 
@@ -186,9 +187,22 @@ defmodule DSBetWeb.ValueLive.Index do
   end
 
 
+  @impl true
+  def handle_info({:bet_won, balance}, socket) do
+
+    Process.send(self(), :connected, [])
+    {:noreply, socket
+      |> put_flash(:info, "Bet won! <br>You can still win more.")
+      |> assign(:balance, Decimal.to_string(balance))}
+  end
 
 
 
+  @impl true
+  def handle_info(:bet_lost, socket) do
+    Process.send(self(), :connected, [])
+    {:noreply, socket |> put_flash(:error, "Don't give up! <br>Let him, who has not lost a game, be the first to cast a stone!")}
+  end
 
   # @impl true
   # def handle_event("start_timer", _unsigned_params, socket) do
@@ -204,6 +218,17 @@ defmodule DSBetWeb.ValueLive.Index do
 
   #   {:noreply, stream_delete(socket, :values, value)}
   # end
+  @impl true
+  def handle_event("clear-flash", _, socket) do
+    Process.send(self(), :connected, [])
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("bet-price-up", params, socket) do
+    IO.inspect(%{params: params})
+    {:noreply, socket}
+  end
 
 
   @impl true
@@ -212,9 +237,10 @@ defmodule DSBetWeb.ValueLive.Index do
     # disable the submit bet button until all the entries are validated
     # re validate during submit bet event
     IO.inspect(%{bet_params: bet_params})
+    user_id = socket.assigns.user_id
 
     changeset =
-      %Bet{user_id: 1}
+      %Bet{user_id: user_id}
       |> Game.validate_bet(bet_params)
       |> Map.put(:action, :validate)
 
@@ -233,33 +259,43 @@ defmodule DSBetWeb.ValueLive.Index do
 
   @impl true
   def handle_event("bet_submitted", params, socket) do
+    IO.inspect{%{bet_parameter: params}}
     IO.inspect(%{params: params["bet"]})
-    user_id = 1
-    wallet = Accounts.get_wallet_user(user_id)
+
+
+    user_id = socket.assigns.user_id
+    wallet = Wallets.get_user_wallet(user_id)
     IO.inspect(%{wallet: wallet})
 
     bet_attrs = params["bet"]
       |> Map.put("user_id", user_id)
       |> Map.put("start_value", DSBet.ValueTracker.get_value())
 
-    IO.inspect(%{stake: Integer.parse(bet_attrs["stake"])})
-    if Decimal.to_integer(wallet.balance) >= Integer.parse(bet_attrs["stake"]) do
-      IO.inspect(%{can_bet: "yes"})
-    else
+    IO.inspect(%{stake: String.to_integer(bet_attrs["stake"])})
+    integer_balance = Decimal.to_integer(wallet.balance)
+    if Decimal.to_integer(wallet.balance) < String.to_integer(bet_attrs["stake"]) do
       IO.inspect(%{can_bet: "no"})
+      {:noreply, socket
+                  |> put_flash(:error, "Your Wallet balance is too low!")}
+    else
 
+
+      {:ok, bet} = DSBet.Game.create_bet(bet_attrs)
+
+      Phoenix.PubSub.subscribe(DSBet.PubSub, "bet-worker-#{bet.id}")
+      DSBet.Bet.Utils.start_bet_worker(%{id: bet.id, name: :"bet-worker-#{bet.id}"})
+      # update the wallet by deducting the amount of naira staked from the wallet
+      {:ok, updated_wallet} = Wallets.update_wallet_balance(wallet, %{balance: Decimal.new(integer_balance - bet.stake)})
+      Process.send(self(), :connected, [])
+
+      {:noreply, socket
+                  |> put_flash(:info, "Bet started successfully!")
+                  |> assign(:balance, Decimal.to_string(updated_wallet.balance))}
     end
 
-    IO.inspect(%{bet_attrs: bet_attrs})
-
-    {:ok, bet} = DSBet.Game.create_bet(bet_attrs)
-
-    IO.inspect(bet)
-    Phoenix.PubSub.subscribe(DSBet.PubSub, "bet-worker-#{bet.id}")
-    DSBet.Bet.Utils.start_bet_worker(%{id: bet.id, name: :"bet-worker-#{bet.id}"})
-    IO.puts("Gotten to the worker")
-    {:noreply, socket}
   end
+
+
 
   # defp authenticated?(assigns) do
   #   assigns[:user_id] != nil

@@ -13,9 +13,9 @@ defmodule DSBet.Plugs.RequireAuth do
       conn
     else
       conn
-      # |> put_flash(:error, "You are not authorized to access requested page.")
-      # |> redirect(to: "/s/vendors")
-      |> redirect(external: "https://www.google.com")
+      |> put_flash(:error, "You are not authorized to access requested page.")
+      |> redirect(to: "/login")
+      # |> redirect(external: "https://www.google.com")
       |> halt()
     end
   end

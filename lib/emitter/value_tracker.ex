@@ -33,7 +33,7 @@ defmodule DSBet.ValueTracker do
   def init(_) do
     schedule_work()
     # get the last value from the database
-    {:ok, %{value_list: [], value: 0}}
+    {:ok, %{value_list: [0], value: 0}}
   end
 
   @impl true
@@ -41,16 +41,19 @@ defmodule DSBet.ValueTracker do
     # value_gotten = DSBet.RandomGenerator.get(value)
     # new_value = value + value_gotten
     new_value = DSBet.RandomGenerator.get(value)
+    new_time = Time.utc_now().second
+
     # IO.inspect(%{new_value: new_value})
 
-    temp_list = value_list ++ [new_value]
+    temp_list = value_list ++ [[new_value, new_time]]
     new_value_list = temp_list
       |> Enum.reverse()
-      |> Enum.take(500)
+      |> Enum.take(300)
       |> Enum.reverse()
-    Phoenix.PubSub.broadcast(DSBet.PubSub, "value_tracker", {:value_updated, new_value})
+
+    Phoenix.PubSub.broadcast(DSBet.PubSub, "value_tracker", {:value_updated, {new_value, new_time}})
     schedule_work()
-    {:noreply, %{value_list: new_value_list, value: new_value}}
+    {:noreply, %{value_list: new_value_list, value: new_value, time: new_time}}
   end
 
   @impl true

@@ -3,6 +3,7 @@ defmodule DSBet.Bet.Worker do
 
   alias DSBet.Game
   alias DSBet.Value.Subscription
+  alias DSBet.Wallets
   # Client Functions
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts.id, name: opts.name)
@@ -33,7 +34,7 @@ defmodule DSBet.Bet.Worker do
 
 
   @impl true
-  def handle_info({:value_updated, new_value}, %{
+  def handle_info({:value_updated, {new_value, _new_time}}, %{
     bet: bet,
     start_value: start_value,
     end_value: _end_value,
@@ -43,7 +44,7 @@ defmodule DSBet.Bet.Worker do
     active: active,
     }) do
 
-    IO.inspect(info: "got the first info")
+    # IO.inspect(info: "got the first info")
 
     if duration_left <= 0 do
       Subscription.unsubscribe()
@@ -142,7 +143,10 @@ defmodule DSBet.Bet.Worker do
       "bet-worker-#{bet.id}",
       {:bet_finalised, bet})
 
+
     # terminate the server here
+    Process.send(self(), :kill_me_pls, [])
+
     {:noreply, %{
       bet: bet,
       start_value: start_value,
@@ -189,12 +193,25 @@ defmodule DSBet.Bet.Worker do
   end
 
   defp bet_won(bet) do
-    IO.inspect(%{stake: bet.stake, money_won: bet.stake * 2 })
+    # IO.inspect(%{stake: bet.stake, money_won: bet.stake * 2 })
+    # send a flash to the user and update the wallet
+    wallet = Wallets.get_user_wallet(bet.user_id)
+    {:ok, updated_wallet} = Wallets.update_wallet_balance(wallet, %{balance: Decimal.add(Decimal.new("#{bet.stake * 1.5}"), wallet.balance)})
+
+    Phoenix.PubSub.broadcast(
+      DSBet.PubSub,
+      "bet-worker-#{bet.id}",
+      {:bet_won, updated_wallet.balance})
   end
 
 
   defp bet_lost(bet) do
-    IO.inspect(%{stake: bet.stake, money_lost: bet.stake })
+    # IO.inspect(%{stake: bet.stake, money_lost: bet.stake })
+
+    Phoenix.PubSub.broadcast(
+      DSBet.PubSub,
+      "bet-worker-#{bet.id}",
+      :bet_lost)
   end
   # def terminate(reason, state) do
 

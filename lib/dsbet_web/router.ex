@@ -18,20 +18,19 @@ defmodule DSBetWeb.Router do
   pipeline :require_authenticated_user do
     # remove this plug after it has been tested
     plug DSBet.Plugs.SetUser #our module plug is added onto list of plugs. notice the all above are function plugs.
-
     plug DSBet.Plugs.RequireAuth
-
   end
 
   scope "/", DSBetWeb do
-    # pipe_through [:browser, :require_authenticated_user]
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
+    # pipe_through :browser
 
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
+    # get "/login", PageController, :login
+    get "/signout", PageController, :signout
 
-
-    live "/values", ValueLive.Index, :index
+    live "/", ValueLive.Index, :index
     live "/values/new", ValueLive.Index, :new
     live "/values/:id/edit", ValueLive.Index, :edit
 
@@ -39,6 +38,11 @@ defmodule DSBetWeb.Router do
     live "/values/:id/show/edit", ValueLive.Show, :edit
   end
 
+  scope "/", DSBetWeb do
+    pipe_through :browser
+
+    get "/login", PageController, :login
+  end
 
 
   scope "/api", DSBetWeb do

@@ -8,8 +8,9 @@ defmodule DSBet.Game do
 
   alias DSBet.Game.Bet
 
-  def last_bet do
+  def last_bet(user_id) do
     query = from b in Bet,
+      where: b.user_id == ^user_id,
       order_by: [desc: :id],
       select: b
 

@@ -1,30 +1,46 @@
 
-<div class="grid grid-cols-8 grid-rows-5 h-screen w-2xl">
-  <div class="col-span-1 row-span-3 p-2 mx-auto shadow-lg">
+<div class="md:grid md:grid-cols-8 md:grid-rows-5 md:h-screen md:w-2xl">
+  <div class="cmd:ol-span-1 md:row-span-3 p-2 mx-auto shadow-lg">
       
     <.header>
-      <div class="text-white">
-        Pachinko
+      <div class="sm:flex sm:flex-wrapsm:gap-2 md:block md:space-y-2 relative w-full">
+        <div class="text-white">
+          Pachinko
+        </div>
+        <div class="text-lightText">
+          <%= @page_title %>
+        </div>
+        <div class="w-full md:block">
+          <.link patch={~p"/values/new"}>
+            <.button>New Value</.button>
+          </.link>
+        </div>
+        <div>
+          <.link navigate={~p"/"}>
+            <.button>Fund Wallet</.button>
+          </.link>
+        </div>
+        <div>
+          <.link navigate={~p"/"}>
+            <.button>Withdraw Funds</.button>
+          </.link>
+        </div>
+        <div>
+          <.link navigate={~p"/signout"}>
+            <.button>Logout</.button>
+          </.link>
+        </div>
       </div>
-      <div class="text-lightText">
-        <%= @page_title %>
-      </div>
-      <div>
-        <.link patch={~p"/values/new"}>
-          <.button>New Value</.button>
-        </.link>
-      </div>
-
     </.header>
 
   </div>
 
-  <div class="col-span-5 row-span-3 flex items-center relative p-2 shadow-lg">
+  <div class="md:col-span-5 md:row-span-3 flex items-center relative p-2 shadow-lg">
     <div phx-hook="chart" id="chartContainer" style="height: 100%; width: 100%; background: linear-gradient(60deg,#f5700c,#ff9800)">
     </div>
   </div>
 
-  <div class="col-span-2 row-span-5 relative  mx-auto shadow-lg">
+  <div class="md:col-span-2 md:row-span-5 relative  mx-auto shadow-lg">
     <div class="overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 h-full p-2">
       <.table
         id="bets"
@@ -52,7 +68,7 @@
     </div>
   </div>
 
-  <div class="col-span-6 row-span-2 relative flex items-end flex-col p-4 relative shadow-lg">
+  <div class="md:col-span-6 md:row-span-2 relative flex items-end flex-col p-4 relative shadow-lg">
   
     <div class="flex justify-between items-center w-full relative border-b border-blue-700">
     
@@ -60,25 +76,25 @@
         <%= @display_value %>
       </div>
         <div class="flex flex-row">
-          <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
+          <svg class="w-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
             <path fill-rule="evenodd" d="M9.315 7.584C12.195 3.883 16.695 1.5 21.75 1.5a.75.75 0 01.75.75c0 5.056-2.383 9.555-6.084 12.436A6.75 6.75 0 019.75 22.5a.75.75 0 01-.75-.75v-4.131A15.838 15.838 0 016.382 15H2.25a.75.75 0 01-.75-.75 6.75 6.75 0 017.815-6.666zM15 6.75a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" clip-rule="evenodd"/>
             <path d="M5.26 17.242a.75.75 0 10-.897-1.203 5.243 5.243 0 00-2.05 5.022.75.75 0 00.625.627 5.243 5.243 0 005.022-2.051.75.75 0 10-1.202-.897 3.744 3.744 0 01-3.008 1.51c0-1.23.592-2.323 1.51-3.008z"/>
           </svg>
 
-          <span id="start_value" class="text-blue-900 font-semibold">0</span>
+          <span id="start_value" style="color: #ff9800;" class="font-semibold text-2xl">0</span>
         </div>
         <div class="flex flex-row">
-          <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
+          <svg class="w-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm3 10.5a.75.75 0 000-1.5H9a.75.75 0 000 1.5h6z" clip-rule="evenodd"/>
           </svg>
 
-          <span id="diff" class="text-blue-900 font-semibold">0</span>
+          <span id="diff" style="color: #ff9800;" class="font-semibold text-2xl">0</span>
         </div>
         <div class="flex flex-row"> 
-          <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12 2.25A6.75 6.75 0 005.25 9v.75a8.217 8.217 0 01-2.119 5.52.75.75 0 00.298 1.206c1.544.57 3.16.99 4.831 1.243a3.75 3.75 0 107.48 0 24.583 24.583 0 004.83-1.244.75.75 0 00.298-1.205 8.217 8.217 0 01-2.118-5.52V9A6.75 6.75 0 0012 2.25zM9.75 18c0-.034 0-.067.002-.1a25.05 25.05 0 004.496 0l.002.1a2.25 2.25 0 11-4.5 0zm.75-10.5a.75.75 0 000 1.5h1.599l-2.223 3.334A.75.75 0 0010.5 13.5h3a.75.75 0 000-1.5h-1.599l2.223-3.334A.75.75 0 0013.5 7.5h-3z" clip-rule="evenodd"/>
+          <svg class="w-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff9800" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd"/>
           </svg>
-          <span id="duration_left" class="text-blue-900 font-semibold">
+          <span id="duration_left" style="color: #ff9800;" class="font-semibold text-2xl">
             0
           </span>
         </div>
@@ -93,30 +109,33 @@
       </div>
     </div>
 
-    <div class="h-full w-full">
+    <div class="h-full w-full relative">
       <.simple_form
         for={@bet_form}
         id="bet-form"
         phx-change="validate_bet"
-        phx-submit="bet_submitted"
+        class="relative"
       >
-       <div class="flex items-center w-full"> 
-        <.input id="id_stake" field={@bet_form[:stake]} type="number" label="Stake (in Naira)" value={100} required/>
-        <.input id="id_tank" field={@bet_form[:tank]} type="checkbox" label="Tanks (price goes down)"/>
-        <.input id="id_duration" field={@bet_form[:duration]} type="number" label="Duration (in seconds)" value={30} required/>
+       <div class="flex items-start gap-4 justify-between w-1/2 max-w-full relative"> 
+        <.input id="id_stake" cls_attr="bg-fda border-grey-400 text-grey-100" field={@bet_form[:stake]} type="number" label="Stake (in Naira)" value={100} required/>
+        <.input id="id_duration" cls_attr="bg-fda border-grey-400 text-grey-100" field={@bet_form[:duration]} type="number" label="Duration (in seconds)" value={30} required/>
        </div> 
-        <:actions>
+       <div class="flex justify-between items-center mt-4 w-1/2 max-w-full">
           <%= if assigns.form_is_not_valid do %>
-          <.button disabled> Submit Bet (disabled)</.button>
+          <.button disabled>
+            <.icon name="hero-arrow-path" class="animate-spin w-8 h-8" />
+          </.button>
           <% else %>
+          <div style="background: linear-gradient(60deg,#f5700c,#ff9800)" phx-click={JS.dispatch("bet-price-down")} class="hover:cursor-pointer rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3 active:text-white/80">
+            <.icon name="hero-arrow-down-circle" class="w-10 h-10" />
+          </div>
 
-          <button class="flex flex-row items-center justify-center w-16 p-4 phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3 active:text-white/80">
-            <svg class="w-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-              <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd"/>
-            </svg>
-          </button>
+          <div style="background: linear-gradient(60deg,#f5700c,#ff9800)" phx-click={JS.dispatch("bet-price-up")} class="hover:cursor-pointer rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3 active:text-white/80">
+            <.icon name="hero-arrow-up-circle" class="w-10 h-10" />
+          </div>
+
           <% end %>
-        </:actions>
+       </div>
       </.simple_form>
     </div>
   </div>
@@ -125,14 +144,14 @@
 
 
 
-<.modal :if={@live_action in [:new, :edit]} id="value-modal" show on_cancel={JS.patch(~p"/values")}>
+<.modal :if={@live_action in [:new, :edit]} id="value-modal" show on_cancel={JS.patch(~p"/")}>
   <.live_component
     module={DSBetWeb.ValueLive.FormComponent}
     id={@value.id || :new}
     title={@page_title}
     action={@live_action}
     value={@value}
-    patch={~p"/values"}
+    patch={~p"/"}
   />
 </.modal>
 
@@ -140,9 +159,11 @@
 
 
 
+
+
 <script>
 function formatList(list) {
-  return list.map((element, index) => ({ x: index + 1, y: element }));
+  return list.map((element, index) => ({ x: index + 1, y: element[0] }));
 }
 
 var xVal;
@@ -154,7 +175,7 @@ window.addEventListener("phx:socket-connected", (e) => {
     let list_value = e.detail.value_list;
     console.log(list_value)
     dps = formatList(list_value);   //dataPoints. 
-
+    console.log(dps);
     chart = new CanvasJS.Chart("chartContainer",{
         zoomEnabled: true,
         theme: "dark2",
@@ -170,7 +191,7 @@ window.addEventListener("phx:socket-connected", (e) => {
             title: "Units"
         },
         data: [{
-            type: "line",
+            type: "spline",
             color: "whitesmoke",
             dataPoints : dps
         }]
@@ -183,20 +204,16 @@ window.addEventListener("phx:socket-connected", (e) => {
 })
 
 let current_value = document.getElementById("current_value");
-var yVal;	
 
 window.addEventListener("phx:chart-updated", (e) => {
   let el = e.detail.last_value;
   if(el) {
-    // logic for highlighting
-    current_value.textContent = el;
-    // console.log(el);
+    current_value.textContent = el[0];
 
     xVal++;
-    yVal = el;	
-    dps.push({x: xVal,y: yVal});
+    dps.push({x: xVal,y: el[0]});
 
-        if (dps.length > 500 )
+        if (dps.length > 300 )
         {
             dps.shift();				
         }

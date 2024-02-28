@@ -61,23 +61,7 @@ defmodule DSBet.Accounts do
 
     DSBet.Wallets.create_user_wallet(%{balance: 100, user_id: user.id})
   end
-  #DSBet.Wallets.create_user_wallet(%{balance: 100, user_id: 1})
-  #DSBet.Accounts.get_user_wallet(1)
-  #DSBet.Accounts.get_wallet_user(1)
 
-  def get_wallet_user(user_id) do
-    query = from w in DSBet.Wallets.Wallet,
-      where: w.user_id == ^user_id,
-      select: w
-    Repo.one(query)
-  end
-
-  def get_user_wallet(user_id) do
-    query = from u in User,
-      where: u.id == ^user_id,
-      select: u
-    Repo.one(query)
-  end
 
   @doc """
   Updates a user.

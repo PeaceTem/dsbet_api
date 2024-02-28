@@ -5,7 +5,7 @@ defmodule DSBet.Game.Bet do
   schema "bets" do
     field :start_value, :float
     field :end_value, :float
-    field :stake, :float
+    field :stake, :integer
     field :duration, :integer
     field :tank, :boolean
     field :user_id, :id
@@ -31,7 +31,7 @@ defmodule DSBet.Game.Bet do
   @doc false
   def validate_bet_changeset(bet, attr) do
     bet
-    |> cast(attr,[:stake, :tank, :duration, :user_id])
-    |> validate_required([:stake, :tank, :duration, :user_id])
+    |> cast(attr,[:stake, :duration, :user_id])
+    |> validate_required([:stake, :duration, :user_id])
   end
 end

@@ -23,11 +23,11 @@ defmodule DSBetWeb.AuthController do
             conn
             |> put_flash(:info, "Welcome back")
             |> put_session(:user_id, user.id) # might not be needed; perhaps, you should just return a token for the user to store in his localhost
-            |> redirect(to: "/values")
+            |> redirect(to: "/")
         {:error, _reason} ->
             conn
             |> put_flash(:error, "error signing in")
-            |> redirect(to: "/")
+            |> redirect(to: "/login")
     end
   end
 

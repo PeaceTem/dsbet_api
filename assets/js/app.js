@@ -29,49 +29,22 @@ import topbar from "../vendor/topbar"
 let Hooks = {}
 Hooks.chart = {
   mounted() {
-        console.log("The HOok is working!");
-        var dps = [{x: 1, y: 10}, {x: 2, y: 13}, {x: 3, y: 18}, {x: 4, y: 20}, {x: 5, y: 17},{x: 6, y: 10}, {x: 7, y: 13}, {x: 8, y: 18}, {x: 9, y: 20}, {x: 10, y: 17}];   //dataPoints. 
+    let id_stake = document.getElementById("id_stake");
+    let id_duration = document.getElementById("id_duration");
+    
+    window.addEventListener("bet-price-up", e => {
+      console.log("The up button was clicked!");
+      console.log(id_stake.value);
+      console.log(id_duration.value);
+      this.pushEvent("bet_submitted", {bet: {tank: false, stake: id_stake.value, duration: id_duration.value}});
+    })
 
-        var chart = new CanvasJS.Chart("chartContainer",{
-            title :{
-                text: "Live Data"
-            },
-            axisX: {						
-                title: "Axis X Title"
-            },
-            axisY: {						
-                title: "Units"
-            },
-            data: [{
-                type: "line",
-                dataPoints : dps
-            }]
-        });
-
-        chart.render();
-        var xVal = dps.length + 1;
-        var yVal = 15;	
-        var updateInterval = 1000;
-
-        var updateChart = function () {
-
-
-            yVal = yVal +  Math.round(5 + Math.random() *(-5-5));
-            dps.push({x: xVal,y: yVal});
-
-            xVal++;
-            if (dps.length >  10 )
-            {
-                dps.shift();				
-            }
-
-            chart.render();		
-
-      // update chart after specified time. 
-
-    };
-
-    setInterval(function(){updateChart()}, updateInterval); 
+    window.addEventListener("bet-price-down", e => {
+        console.log("The down button was clicked!");
+        console.log(id_stake.value);
+        console.log(id_duration.value);
+        this.pushEvent("bet_submitted", {bet: {tank: true, stake: id_stake.value, duration: id_duration.value}});
+      })
   },
   updated() {
     console.log("The HOok is working!");

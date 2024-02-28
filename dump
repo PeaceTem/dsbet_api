@@ -19,3 +19,8 @@
     </.link>
   </:action>
 </.table>
+
+
+
+
+      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}

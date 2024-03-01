@@ -5,13 +5,13 @@
   },
   "host": "localhost:4000",
   "definitions": {},
-  "basePath": "/api",
   "tags": [
     {
       "name": "Users",
       "description": "Operations about Users"
     }
   ],
+  "basePath": "/api",
   "paths": {},
   "swagger": "2.0"
 }

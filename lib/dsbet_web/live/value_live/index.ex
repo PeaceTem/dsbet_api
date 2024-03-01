@@ -56,9 +56,8 @@ defmodule DSBetWeb.ValueLive.Index do
     _user = Accounts.get_user!(user_id)
     last_bet = Game.last_bet(user_id)
     IO.puts("Gotten to the first place!")
-    IO.inspect(%{end_value: last_bet.end_value, null: is_nil(last_bet.end_value)})
 
-    if is_nil(last_bet.end_value), do: BetWorkerSubscription.subscribe(last_bet.id)
+    if !is_nil(last_bet) && is_nil(last_bet.end_value), do: BetWorkerSubscription.subscribe(last_bet.id)
 
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}

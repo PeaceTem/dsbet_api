@@ -37,6 +37,9 @@ defmodule DSBet.Wallets do
   """
   def get_wallet!(id), do: Repo.get!(Wallet, id)
 
+  def get_wallet(id), do: Repo.get(Wallet, id)
+
+
   def get_user_wallet(user_id), do: Repo.get_by(Wallet, user_id: user_id)
 
 

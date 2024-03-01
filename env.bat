@@ -2,4 +2,4 @@ set GOOGLE_CLIENT_ID=543635591763-npkhv13tmpk7dli98rfdsaal008g5bns.apps.googleus
 set GOOGLE_CLIENT_SECRET=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
 set SECRET_KEY_BASE=rgn4en36nm4fNtH97cpcvOdN8FRN4SILzp66FBqL2XnHL0fx9MXBKJiyAx8WEJpe
 set DATABASE_URL=ecto://postgres:olugbongaga@localhost:5432/dsbet
-set PHX_SERVER=true
+@REM set PHX_SERVER=true

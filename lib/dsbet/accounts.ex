@@ -62,6 +62,10 @@ defmodule DSBet.Accounts do
     DSBet.Wallets.create_user_wallet(%{balance: 100, user_id: user.id})
   end
 
+  def create_user_with_changeset(changeset) do
+    {:ok, user} = Repo.insert(changeset)
+    DSBet.Wallets.create_user_wallet(%{balance: 100, user_id: user.id})
+  end
 
   @doc """
   Updates a user.

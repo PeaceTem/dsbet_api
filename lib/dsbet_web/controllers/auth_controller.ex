@@ -11,7 +11,7 @@ defmodule DSBetWeb.AuthController do
     IO.inspect(auth)
     user_params = %{token: auth.credentials.token, email: auth.info.email, provider: "google"}
     changeset = User.google_changeset(%User{}, user_params)
-
+    IO.inspect(%{changeset: changeset})
     signin(conn, changeset)
   end
 
@@ -35,27 +35,27 @@ defmodule DSBetWeb.AuthController do
   defp insert_or_update_user(changeset) do
     case Repo.get_by(User, email: changeset.changes.email) do
         nil ->
-          Repo.insert(changeset)
+          DSBet.Accounts.create_user_with_changeset(changeset)
         user ->
-          {:ok, user}
+          ensure_wallet(user)
       end
   end
 
+  defp ensure_wallet(user) do
+    wallet = DSBet.Wallets.get_wallet(user.id)
+    if wallet do
+      {:ok, user}
+    else
+      DSBet.Wallets.create_user_wallet(%{balance: 100, user_id: user.id})
+      {:ok, user}
+    end
+  end
 
-
+  @spec signout(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def signout(conn, _params) do
     conn
     |> configure_session(drop: true)
     |> put_flash(:info, "Logged out successfully!")
     |> redirect(to: "/")
   end
-
-
-  # def signout(conn, _params) do
-  #   conn
-  #   |> configure_session(drop: true) # use the logic for a rest api here
-  #   # |> put_flash(:info, "Logged out successfully!")
-  #   |> redirect(to: "/")
-  # end
-
  end

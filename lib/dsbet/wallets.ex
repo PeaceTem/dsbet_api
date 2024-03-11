@@ -85,7 +85,8 @@ defmodule DSBet.Wallets do
 
       iex> update_wallet(wallet, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
+  wallet = DSBet.Wallets.get_wallet!(1)
+  DSBet.Wallets.update_wallet_balance(wallet, %{balance: Decimal.new("1000")})
   """
   def update_wallet(%Wallet{} = wallet, attrs) do
     wallet

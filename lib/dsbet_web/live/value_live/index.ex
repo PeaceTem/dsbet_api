@@ -1,8 +1,6 @@
 defmodule DSBetWeb.ValueLive.Index do
   use DSBetWeb, :live_view
 
-  alias DSBet.Tracker
-  alias DSBet.Tracker.Value
   alias DSBet.Value.Subscription
   alias DSBet.Accounts
   alias DSBet.Game
@@ -22,7 +20,7 @@ defmodule DSBetWeb.ValueLive.Index do
     # IO.inspect(session["user_id"])
 
     updated_socket = socket
-      |> assign(:user_id, session["user_id"] || 1)
+      |> assign(:user_id, session["user_id"])
 
 
 
@@ -64,23 +62,18 @@ defmodule DSBetWeb.ValueLive.Index do
   end
 
 
-
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Value")
-    |> assign(:value, Tracker.get_value!(id))
-  end
-
-
-
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :pay, _params) do
     Process.send_after(self(), :connected, 100)
     socket
-    |> assign(:page_title, "New Value")
-    |> assign(:value, %Value{})
-
+    |> assign(:page_title, "Fund Wallet")
   end
 
+
+  defp apply_action(socket, :withdraw, _params) do
+    Process.send_after(self(), :connected, 100)
+    socket
+    |> assign(:page_title, "Withdraw Funds")
+  end
 
 
   defp apply_action(socket, :index, _params) do
@@ -124,43 +117,6 @@ defmodule DSBetWeb.ValueLive.Index do
 
 
 
-  # decrement the timer, update the difference, finalise the bet when the timer is on zero
-  # @impl true
-  # def handle_info(:time_updated, socket) do
-  #   # {:noreply, update(socket, :timer, fn time_value -> time_value - 1 end)}
-  #   case socket.assigns.timer do
-  #     1 -> DSBet.Timer.Subscription.unsubscribe()
-  #     _ -> nil
-  #   end
-  #   new_time = max(0, socket.assigns.timer - 1)
-  #   updated_socket = put_in(socket.assigns[:timer], new_time)
-  #   {:noreply, push_event(updated_socket, "time-updated", %{current_time: new_time})}
-  # end
-
-
-
-  # @impl true
-  # def handle_info(:tick, socket) when socket.assigns.time_remaining > 0 do
-
-  #   new_time_remaining = socket.assigns.time_remaining - 1
-
-  #   if new_time_remaining > 5 do
-  #     Process.send_after(self(), :tick, 1000)
-  #   end
-
-  #   updated_socket = put_in(socket.assigns[:time_remaining], new_time_remaining)
-  #   IO.inspect(new_time_remaining)
-
-  #   {:noreply, push_event(updated_socket, "time_remaining-updated", %{time_remaining: new_time_remaining})}
-  # end
-
-  # @impl true
-  # def handle_info(:tick, socket) do
-  #   {:noreply, socket}
-  # end
-
-
-
   @impl true
   def handle_info({:bet_state, %{
     start_value: start_value,
@@ -191,7 +147,7 @@ defmodule DSBetWeb.ValueLive.Index do
 
     Process.send(self(), :connected, [])
     {:noreply, socket
-      |> put_flash(:info, "Bet won! <br>You can still win more.")
+      |> put_flash(:info, "Bet won! You can still win more.")
       |> assign(:balance, Decimal.to_string(balance))}
   end
 
@@ -200,23 +156,10 @@ defmodule DSBetWeb.ValueLive.Index do
   @impl true
   def handle_info(:bet_lost, socket) do
     Process.send(self(), :connected, [])
-    {:noreply, socket |> put_flash(:error, "Don't give up! <br>Let him, who has not lost a game, be the first to cast a stone!")}
+    {:noreply, socket |> put_flash(:error, "Don't give up! Let him, who has not lost a game, be the first to cast a stone!")}
   end
 
-  # @impl true
-  # def handle_event("start_timer", _unsigned_params, socket) do
-  #   Process.send(self(), :tick, [])
-  #   {:noreply, socket}
-  # end
 
-  # @impl true
-  # @spec handle_event(<<_::48>>, map(), Phoenix.LiveView.Socket.t()) :: {:noreply, map()}
-  # def handle_event("delete", %{"id" => id}, socket) do
-  #   value = Tracker.get_value!(id)
-  #   {:ok, _} = Tracker.delete_value(value)
-
-  #   {:noreply, stream_delete(socket, :values, value)}
-  # end
   @impl true
   def handle_event("clear-flash", _, socket) do
     Process.send(self(), :connected, [])
@@ -303,5 +246,6 @@ defmodule DSBetWeb.ValueLive.Index do
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :bet_form, to_form(changeset))
   end
+
 
 end

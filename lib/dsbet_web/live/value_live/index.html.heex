@@ -7,26 +7,21 @@
         <div class="text-white">
           Pachinko
         </div>
-        <div class="text-lightText">
+        <div class="text-zinc-400">
           <%= @page_title %>
         </div>
-        <div class="w-full md:block">
-          <.link patch={~p"/values/new"}>
-            <.button>New Value</.button>
-          </.link>
-        </div>
         <div>
-          <.link navigate={~p"/"}>
+          <.link patch={~p"/pay"}>
             <.button>Fund Wallet</.button>
           </.link>
         </div>
         <div>
-          <.link navigate={~p"/"}>
+          <.link navigate={~p"/withdraw"}>
             <.button>Withdraw Funds</.button>
           </.link>
         </div>
         <div>
-          <.link navigate={~p"/signout"}>
+          <.link navigate={~p"/auth/signout"}>
             <.button>Logout</.button>
           </.link>
         </div>
@@ -46,23 +41,22 @@
         id="bets"
         rows={@streams.bets}
       >
-        <:col :let={{_id, bet}} label="Open"><%= bet.start_value %></:col>
-        <:col :let={{_id, bet}} label="Close"><%= bet.end_value %></:col>
+        <:col :let={{_id, bet}} label="Open"><div class="text-zinc-400"><%= bet.start_value %></div></:col>
+        <:col :let={{_id, bet}} label="Close"><div class="text-zinc-400"><%= bet.end_value %></div></:col>
         <:col :let={{_id, bet}} label="Tank">
           <%= if bet.tank do %>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={ if bet.start_value > bet.end_value, do: "green", else: "red"} aria-hidden="true">
-              <path fill-rule="evenodd" d="M12 2.25a.75.75 0 01.75.75v16.19l6.22-6.22a.75.75 0 111.06 1.06l-7.5 7.5a.75.75 0 01-1.06 0l-7.5-7.5a.75.75 0 111.06-1.06l6.22 6.22V3a.75.75 0 01.75-.75z" clip-rule="evenodd"/>
-            </svg>
+      
+            <.icon name="hero-arrow-down-circle" class={ if bet.start_value > bet.end_value, do: "bg-green-600 h-10 w-10", else: "bg-red-600 h-10 w-10" } />
 
           <% else %>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={ if bet.start_value < bet.end_value, do: "green", else: "red"}  aria-hidden="true">
-              <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06l-6.22-6.22V21a.75.75 0 01-1.5 0V4.81l-6.22 6.22a.75.75 0 11-1.06-1.06l7.5-7.5z" clip-rule="evenodd"/>
-            </svg>
+
+            <.icon name="hero-arrow-up-circle" class={ if bet.start_value < bet.end_value, do: "bg-green-600 h-10 w-10", else: "bg-red-600 h-10 w-10" } />
+
           <% end %>
         </:col>
 
-        <:col :let={{_id, bet}} label="Stake"><%= bet.stake %></:col>
-        <:col :let={{_id, bet}} label="Duration"><%= bet.duration %></:col>
+        <:col :let={{_id, bet}} label="Stake"><div class="text-zinc-400"><%= bet.stake %></div></:col>
+        <:col :let={{_id, bet}} label="Duration"><div class="text-zinc-400"><%= bet.duration %></div></:col>
       </.table>
 
     </div>
@@ -144,18 +138,29 @@
 
 
 
-<.modal :if={@live_action in [:new, :edit]} id="value-modal" show on_cancel={JS.patch(~p"/")}>
+<.modal :if={@live_action in [:pay]} id="payment-modal" show on_cancel={JS.patch(~p"/")}>
   <.live_component
-    module={DSBetWeb.ValueLive.FormComponent}
-    id={@value.id || :new}
+    module={DSBetWeb.ValueLive.PaymentComponent}
+    id={:pay}
     title={@page_title}
     action={@live_action}
-    value={@value}
+    user_id={@user_id}
     patch={~p"/"}
   />
 </.modal>
 
 
+
+<.modal :if={@live_action in [:withdraw]} id="withdrawal-modal" show on_cancel={JS.patch(~p"/")}>
+  <.live_component
+    module={DSBetWeb.ValueLive.WithdrawalComponent}
+    id={:withdraw}
+    title={@page_title}
+    action={@live_action}
+    user_id={@user_id}
+    patch={~p"/"}
+  />
+</.modal>
 
 
 

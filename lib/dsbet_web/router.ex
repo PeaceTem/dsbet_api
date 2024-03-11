@@ -23,19 +23,11 @@ defmodule DSBetWeb.Router do
 
   scope "/", DSBetWeb do
     pipe_through [:browser, :require_authenticated_user]
-    # pipe_through :browser
-
-
-    # get "/", PageController, :home
-    # get "/login", PageController, :login
-    get "/signout", PageController, :signout
 
     live "/", ValueLive.Index, :index
     live "/values/new", ValueLive.Index, :new
-    live "/values/:id/edit", ValueLive.Index, :edit
-
-    live "/values/:id", ValueLive.Show, :show
-    live "/values/:id/show/edit", ValueLive.Show, :edit
+    live "/pay", ValueLive.Index, :pay
+    live "/withdraw", ValueLive.Index, :withdraw
   end
 
   scope "/", DSBetWeb do

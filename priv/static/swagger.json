@@ -11,7 +11,7 @@
       "description": "Operations about Users"
     }
   ],
-  "basePath": "/api",
   "paths": {},
-  "swagger": "2.0"
+  "swagger": "2.0",
+  "basePath": "/api"
 }

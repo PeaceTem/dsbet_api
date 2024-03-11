@@ -48,8 +48,15 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  # host = System.get_env("PHX_HOST") <> ".gigalixirapp.com" || "localhost"
-  host = System.get_env("PHX_HOST") || "localhost"
+  host = System.get_env("PHX_HOST") <> ".gigalixirapp.com" || "localhost"
+  # host = System.get_env("PHX_HOST") || "localhost"
+  # host = case System.get_env("PHX_SERVER") do
+  #   "true" ->
+  #     System.get_env("PHX_HOST") || "example.com"
+
+  #   _ ->
+  #     System.get_env("APP_NAME") <> ".gigalixirapp.com" || "example.com"
+  # end
 
   port = String.to_integer(System.get_env("PORT") || "4000")
 

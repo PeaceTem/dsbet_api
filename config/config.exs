@@ -61,7 +61,7 @@ config :dsbet,
 
 # Configures the endpoint
 config :dsbet, DSBetWeb.Endpoint,
-  url: [host: System.get_env("PHX_HOST") <> ".gigalixirapp.com" || "localhost"],
+  url: [host: "localhost"],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: DSBetWeb.ErrorHTML, json: DSBetWeb.ErrorJSON],

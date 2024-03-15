@@ -156,9 +156,6 @@ defmodule DSBetWeb.ValueLive.Index do
 
   @impl true
   def handle_event("validate_bet", %{"bet" => bet_params}, socket) do
-    # validate the stake(check if it is less than the wallet balance)
-    # disable the submit bet button until all the entries are validated
-    # re validate during submit bet event
     IO.inspect(%{bet_params: bet_params})
     user_id = socket.assigns.user_id
 

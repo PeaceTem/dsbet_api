@@ -2,30 +2,18 @@ defmodule DSBetWeb.ValueLive.Index do
   use DSBetWeb, :live_view
 
   alias DSBet.Value.Subscription
-  alias DSBet.Accounts
   alias DSBet.Game
   alias DSBet.Game.Bet
   alias DSBet.Bet.BetWorkerSubscription
   alias DSBet.Wallets
 
 
-  # def render(assigns) do
-  #   DSBetWeb.LayoutView.render("index.html.heex", assigns, layout: false)
-  # end
-
-
   @impl true
   def mount(_params, session, socket) do
-  # def mount(_params, session, socket) do
-    # IO.inspect(session["user_id"])
 
     updated_socket = socket
       |> assign(:user_id, session["user_id"])
 
-
-
-    # IO.inspect(%{user_id: updated_socket.assigns.user_id})
-    # do stream insert after a bet has been closed
     {:ok, stream(updated_socket, :bets, Game.list_user_bets(updated_socket.assigns.user_id))}
   end
 
@@ -42,7 +30,6 @@ defmodule DSBetWeb.ValueLive.Index do
 
     socket = socket
     |> assign(:display_value, DSBet.ValueTracker.get_value())
-    # |> assign(:user_id, user_id)
     |> assign_form(changeset)
     |> assign(:form_is_not_valid, false)
     |> assign(:balance, Decimal.to_string(wallet.balance))
@@ -50,13 +37,9 @@ defmodule DSBetWeb.ValueLive.Index do
     Process.send_after(self(), :connected, 100)
 
 
-    # use the user object to get the bets related to the user
-    _user = Accounts.get_user!(user_id)
     last_bet = Game.last_bet(user_id)
-    IO.puts("Gotten to the first place!")
 
     if !is_nil(last_bet) && is_nil(last_bet.end_value), do: BetWorkerSubscription.subscribe(last_bet.id)
-
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -77,12 +60,10 @@ defmodule DSBetWeb.ValueLive.Index do
 
 
   defp apply_action(socket, :index, _params) do
-    # if connected?(socket), do: DSBet.Timer.Subscription.subscribe()
 
     socket
     |> assign(:page_title, "Ta Tete Ko J'ere!")
     |> assign(:bet, nil)
-    # |> assign(:bet, %Bet{})
 
   end
 

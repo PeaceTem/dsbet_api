@@ -33,7 +33,7 @@ defmodule DSBet.ValueTracker do
   def init(_) do
     schedule_work()
     # get the last value from the database
-    {:ok, %{value_list: [0], value: 0}}
+    {:ok, %{value_list: [0, Time.utc_now().second], value: 0}}
   end
 
   @impl true
@@ -48,7 +48,7 @@ defmodule DSBet.ValueTracker do
     temp_list = value_list ++ [[new_value, new_time]]
     new_value_list = temp_list
       |> Enum.reverse()
-      |> Enum.take(300)
+      |> Enum.take(100)
       |> Enum.reverse()
 
     Phoenix.PubSub.broadcast(DSBet.PubSub, "value_tracker", {:value_updated, {new_value, new_time}})

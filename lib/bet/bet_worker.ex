@@ -196,7 +196,7 @@ defmodule DSBet.Bet.Worker do
     # IO.inspect(%{stake: bet.stake, money_won: bet.stake * 2 })
     # send a flash to the user and update the wallet
     wallet = Wallets.get_user_wallet(bet.user_id)
-    {:ok, updated_wallet} = Wallets.update_wallet_balance(wallet, %{balance: Decimal.add(Decimal.new("#{bet.stake * 1.5}"), wallet.balance)})
+    {:ok, updated_wallet} = Wallets.update_wallet_balance(wallet, %{balance: Decimal.add(Decimal.new("#{bet.stake * 3}"), wallet.balance)})
 
     Phoenix.PubSub.broadcast(
       DSBet.PubSub,
